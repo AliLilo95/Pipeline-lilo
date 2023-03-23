@@ -1,11 +1,18 @@
 /* Requires the Docker Pipeline plugin */
 pipeline {
-    agent { docker { image 'python:3.10.7-alpine' } }
+    agent any
     stages {
-        stage('build') {
+        stage('Testing Github localy') {
             steps {
-                sh 'python --version'
+                dir('C:\Users\Alili\OneDrive\Skrivbord\Gymgrossisten_Tester'){
+                    bat 'python -m unittest'
             }
+        }
+    }
+        stage('Clean Workspace'){
+           steps {
+               cleanWs()
+    }
         }
     }
 }
