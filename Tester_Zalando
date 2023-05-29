@@ -1,0 +1,83 @@
+import pytest
+from selenium import webdriver
+from selenium.webdriver.common.by import By
+from selenium.webdriver.common.action_chains import ActionChains
+from selenium.webdriver.support import expected_conditions
+from selenium.webdriver.support.wait import WebDriverWait
+from selenium.webdriver.common.keys import Keys
+from selenium.webdriver.common.desired_capabilities import DesiredCapabilities
+from Test_help import boolean_assert, simple_assert
+
+# Setup och Teardown 
+@pytest.fixture
+def load_driver():
+    driver = webdriver.Chrome()
+    yield driver
+    driver.quit()
+
+
+   
+# TESTER >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+
+# Klickar på headern
+def test_01(load_driver):
+    driver = load_driver
+    driver.get("https://www.zalando.se/man-home/")
+    element = load_driver.find_element( By.CSS_SELECTOR, ".z-navicat-header_svgLogo")
+    actions = ActionChains(load_driver)
+    actions.move_to_element(element).perform()
+    load_driver.find_element( By.CSS_SELECTOR, ".z-navicat-header_svgLogo").click()
+    boolean_assert("zalando" in driver.current_url, f"Expected zalando in url, got: {driver.current_url}")
+    
+# Söker efter nike skor i sökfältet.
+def test_02(load_driver):
+    driver = load_driver
+    driver.get("https://www.zalando.se/man-home/")
+    load_driver.find_element(By.NAME, "q").click()
+    load_driver.find_element(By.NAME, "q").send_keys("Nike")
+    load_driver.find_element(By.NAME, "q").send_keys(Keys.ENTER)
+    load_driver.find_element(By.CSS_SELECTOR, ".iheGwP:nth-child(4) .KxHAYs").click()
+    load_driver.execute_script("window.scrollTo(0,200)")
+    heading = driver.find_element(By.XPATH, "/html/body/div[4]/div/x-wrapper-pre-shell/div/div/header/div[1]/div/div/div/div[1]/div/div/div/div[1]/div[2]/a/img")
+    simple_assert(heading.text, "zalando")
+
+ # Navigera till Skor sedan gå tillbaka 
+def test_03(load_driver):
+    driver = load_driver
+    driver.get("https://www.zalando.se/man-home/")
+    driver.find_element(By.XPATH, ".//div[@id='z-navicat-header-root']/header/div/div/div/div/div/div/div/div/div[2]/div[2]/nav/ul/li[3]/span/a/span").click()
+    element = driver.find_element(By.CSS_SELECTOR, ".z-navicat-header_categoryListElement:nth-child(3) .\\_0Qm8W1")
+    actions = ActionChains(driver)
+    actions.move_to_element(element).perform()
+    element = driver.find_element(By.CSS_SELECTOR, "body")
+    actions = ActionChains(driver)
+    element = driver.find_element(By.LINK_TEXT, "Man")
+    actions = ActionChains(driver)
+    actions.move_to_element(element).perform()
+    expected = "Man"
+    assert(element, expected)
+
+# Klicka på profil
+def test_04(load_driver):
+    driver = load_driver
+    driver.get("https://www.zalando.se/man-home/")
+    driver.find_element(By.XPATH, ".//[@id='z-navicat-header-root']/header/div[1]/div/div/div/div[1]/div/div/div/div[1]/div[3]/div/div[1]").click()
+    heading = driver.find_element(By.XPATH, "//*[@id='z-navicat-header-root']/header/div[1]/div/div/div/div[1]/div/div/div/div[1]/div[3]/div/div[1]/a/svg/path")
+    simple_assert(heading.text, "Logga in")
+
+    #driver.find_element(By.CSS_SELECTOR, ".z-navicat-header_navToolItem-profile .zds-icon").click()
+    
+  
+# Scrollar ner helt och klickar på app store som sedan tar mig ditt.
+def test_05(load_driver):
+    driver = load_driver
+    driver.get("https://www.zalando.se/man-home/")
+    driver.set_window_size(1536, 812)
+    driver.execute_script("window.scrollTo(0,48.79999923706055)")
+    driver.execute_script("window.scrollTo(0,11580)")
+    driver.execute_script("window.scrollTo(0,16056.7998046875)")
+    driver.find_element(By.CSS_SELECTOR, ".mx_ksa > .EKabf7 svg > path:nth-child(2)").click()
+    boolean_assert("zalando" in driver.current_url, f"Expected zalando in url, got: {driver.current_url}")
+
+  
+
